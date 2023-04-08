@@ -3,6 +3,7 @@ from auth.db.models.User import User
 from auth.db import db
 from sqlalchemy.exc import IntegrityError
 from enum import Enum
+from auth.utils.password_hash import generate_salt, hash_password
 
 
 class Status(Enum):
@@ -13,12 +14,15 @@ class Status(Enum):
 
 def signup(request: SignUpRequest) -> str:
     try:
-        user: User = User(request.username, request.password)
+        salt = generate_salt()
+        user: User = User(request.username, hash_password(
+            request.password, salt), salt)
         db.session.add(user)
         db.session.commit()
     except IntegrityError:
         return Status.USERNAME_EXIST
-    except Exception:
+    except Exception as ex:
+        print(ex)
         return Status.UNKNOWN_ERROR
 
     return Status.SUCCESS
