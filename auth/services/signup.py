@@ -4,6 +4,8 @@ from auth.db import db
 from sqlalchemy.exc import IntegrityError
 from enum import Enum
 from auth.utils.password_hash import generate_salt, hash_password
+from auth.utils.error_message import create_error_message
+from flask import abort, make_response
 
 
 class Status(Enum):
@@ -20,9 +22,8 @@ def signup(request: SignUpRequest) -> str:
         db.session.add(user)
         db.session.commit()
     except IntegrityError:
-        return Status.USERNAME_EXIST
-    except Exception as ex:
-        print(ex)
-        return Status.UNKNOWN_ERROR
+        return abort(make_response(create_error_message('Username already exist'), 400))
+    except Exception:
+        return abort(make_response(create_error_message('Something went wrong'), 500))
 
-    return Status.SUCCESS
+    return {'response': 'Success'}
