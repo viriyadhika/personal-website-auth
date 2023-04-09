@@ -18,7 +18,7 @@ def signup(request: SignUpRequest) -> str:
     try:
         salt = generate_salt()
         user: User = User(request.username, hash_password(
-            request.password, salt), salt)
+            request.password, salt), salt, 'USER')
         db.session.add(user)
         db.session.commit()
     except IntegrityError:
